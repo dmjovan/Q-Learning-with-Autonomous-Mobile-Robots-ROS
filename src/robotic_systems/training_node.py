@@ -9,9 +9,9 @@ import numpy as np
 from nav_msgs.msg import Odometry
 from sensor_msgs.msg import LaserScan
 
-from qlearning import QLearner
-from robot_controller import RobotController
-from lidar_helper import LidarHelper
+from robotic_systems.qlearning import QLearner
+from robotic_systems.robot_controller import RobotController
+from robotic_systems.lidar_helper import LidarHelper
 
 # initial position if not random position
 X_INIT = -0.4
@@ -36,7 +36,10 @@ class TrainingNode:
 
         self.robot_controller = RobotController()
 
-        self.log_file_dir = "home/ros/Desktop/"
+        self.log_file_dir = "/home/ros/ROS_Workspace/ROS_Projects/src/Q-Learning-with-Autonomous-Mobile-Robots-ROS/src/robotic_systems/results"
+
+        if not os.path.exists(self.log_file_dir): 
+            os.makedirs(self.log_file_dir)
 
         # parameters
         self.q_table_path = q_table_path

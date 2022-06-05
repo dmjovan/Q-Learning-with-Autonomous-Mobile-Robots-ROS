@@ -21,7 +21,7 @@ class LidarHelper:
         pass
 
     @staticmethod
-    def scan_to_arr(msgScan: LaserScan) -> tuple(np.ndarray, np.ndarray):
+    def scan_to_arr(msgScan: LaserScan) -> tuple:
 
         """
             Convert LasecScan msg to array of distances and angles.
@@ -54,7 +54,7 @@ class LidarHelper:
 
 
     @staticmethod
-    def discretize_lidar_scan(state_space: np.ndarray, lidar: np.ndarray) -> tuple(int, int, int, int, int):
+    def discretize_lidar_scan(state_space: np.ndarray, lidar: np.ndarray) -> tuple:
 
         """
             Discretization of lidar measurements.

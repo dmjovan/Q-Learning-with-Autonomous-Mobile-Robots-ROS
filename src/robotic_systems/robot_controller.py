@@ -47,7 +47,7 @@ class RobotController:
 
 
     @staticmethod
-    def get_position(odomMsg: Odometry) -> tuple(float, float):
+    def get_position(odomMsg: Odometry) -> tuple:
 
         """
             Get x and y coordinates in meters.
@@ -167,7 +167,7 @@ class RobotController:
         self.robot_velocity_pub.publish(vel_msg)
 
 
-    def set_position(self, x: float, y: float, theta: float) -> tuple(float, float, float):
+    def set_position(self, x: float, y: float, theta: float) -> tuple:
 
         """
             Setting robot position.
@@ -201,7 +201,7 @@ class RobotController:
         return x, y, theta
 
 
-    def set_random_position(self) -> tuple(float, float, float):
+    def set_random_position(self) -> tuple:
 
         """
             Setting robot in random position andd orientation.
