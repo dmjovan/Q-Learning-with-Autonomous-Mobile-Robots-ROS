@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import rospy
 import random 
 import numpy as np
 from itertools import product
@@ -13,7 +14,7 @@ HORIZON_WIDTH = 75
 
 class QLearner:
 
-    def __init__(self, Q_table_path: str = "", 
+    def __init__(self, load_q_table: bool = False, 
                        alpha: float = 0.5, 
                        gamma: float = 0.9, 
                        epsilon: float = 0.9,
@@ -23,13 +24,19 @@ class QLearner:
         self.actions = self.create_action_space()
         self.state_space = self.create_state_space()
 
-        if Q_table_path == "":
+        if not load_q_table:
             self.Q_table = self.create_Q_table()
+            rospy.loginfo("Created Q table")
         else:
             try:
-                self.Q_table = self.read_Q_table(Q_table_path)
-            except:
+                self.Q_table = self.read_Q_table(
+                    path="/home/ros/ROS_Workspace/ROS_Projects/src/Q-Learning-with-Autonomous-Mobile-Robots-ROS/src/robotic_systems/results/Q_table.csv")
+                rospy.loginfo("Loaded Q table")
+
+            except FileNotFoundError:
                 self.Q_table = self.create_Q_table()
+                rospy.loginfo("Created Q table")
+        
 
         self.alpha = alpha
         self.gamma = gamma
@@ -70,7 +77,7 @@ class QLearner:
     def get_best_action(self, state_ind: int) -> int:
 
         if STATE_SPACE_IND_MIN <= state_ind <= STATE_SPACE_IND_MAX:
-            action = self.actions[np.argmax(self._table[state_ind,:])]
+            action = self.actions[np.argmax(self.Q_table[state_ind,:])]
         else:
             action = self.get_random_action()
         return action

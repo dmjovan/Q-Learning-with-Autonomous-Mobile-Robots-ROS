@@ -126,6 +126,8 @@ class RobotController:
         else:
             raise("Invalid action selected.")
 
+        rospy.loginfo(f"Executing action {action}")
+
 
     def go_forward(self) -> None:
 
