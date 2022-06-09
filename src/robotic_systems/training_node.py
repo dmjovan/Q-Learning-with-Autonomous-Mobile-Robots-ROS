@@ -277,6 +277,8 @@ if __name__ == '__main__':
                             epsilon=epsilon,
                             epsilon_grad=epsilon_grad,
                             epsilon_min=epsilon_min)
+
+        rospy.loginfo("Starting training node!")
         node.run()
 
     except rospy.ROSInterruptException:
