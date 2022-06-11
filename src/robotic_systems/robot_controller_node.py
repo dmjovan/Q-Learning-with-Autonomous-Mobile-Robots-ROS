@@ -31,8 +31,20 @@ class RobotControllerNode:
 
     def action_callback(self, data):
 
-        rospy.loginfo(f"Executing action {str(data.data).upper()}")
-        getattr(self, f"do_{str(data.data)}")()
+        command = str(data.data)
+
+        if str(data.data) in ["forward", "left", "right", "stop"]:
+            rospy.loginfo(f"Executing action {command.upper()}")
+            getattr(self, f"do_{command}")()
+            
+        else:
+            v_scal, w_scal = command.split("_")
+
+            rospy.loginfo(f"Executing command V: {v_scal}, W: {w_scal}")
+
+            vel_msg = create_vel_msg(float(v_scal), float(w_scal))
+            self.robot_velocity_pub.publish(vel_msg)
+
 
 
     def do_forward(self) -> None:
@@ -74,42 +86,6 @@ class RobotControllerNode:
         vel_msg = create_vel_msg(0.0, 0.0)
         self.robot_velocity_pub.publish(vel_msg)
 
-
-    def feedback_control(self, x, y, theta, x_goal, y_goal, theta_goal) -> str:
-
-        """
-            Feedback (FB) robot control algorithm
-        """
-
-        # theta goal normalization
-        if theta_goal >= np.pi:
-            theta_goal_norm = theta_goal - 2 * np.pi
-        else:
-            theta_goal_norm = theta_goal
-
-        rho = np.sqrt(pow((x_goal - x), 2) + pow((y_goal - y), 2))
-        lamdba_ = math.atan2((y_goal - y), (x_goal - x ))
-
-        alpha = (lamdba_ -  theta + np.pi) % (2 * np.pi) - np.pi
-        beta = (theta_goal - lamdba_ + np.pi) % (2 * np.pi) - np.pi
-
-        if rho < GOAL_DIST_THRESHOLD and math.degrees(abs(theta-theta_goal_norm)) < GOAL_ANGLE_THRESHOLD:
-            status = 'Goal position reached!'
-            v = 0
-            w = 0
-            v_scal = 0
-            w_scal = 0
-        else:
-            status = 'Goal position not reached!'
-            v = K_RO * rho
-            w = K_ALPHA * alpha + K_BETA * beta
-            v_scal = v / abs(v) * V_CONST
-            w_scal = w / abs(v) * V_CONST
-
-        vel_msg = create_vel_msg(v_scal, w_scal)
-        self.robot_velocity_pub.publish(vel_msg)
-
-        return status
 
 
 if __name__ == "__main__":

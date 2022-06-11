@@ -21,13 +21,15 @@ from robotic_systems.utils.rospy_utils import *
 
 class InferenceNode:
 
-    def __init__(self) -> None:
+    def __init__(self, random_pos: bool = False) -> None:
 
         rospy.init_node('InferenceNode', anonymous = False)
         self.rate = rospy.Rate(10)
 
         self.robot_position_pub = rospy.Publisher('/gazebo/set_model_state', ModelState, queue_size = 10)
         self.action_pub = rospy.Publisher('/robot_action', String, queue_size = 10)
+
+        self.random_init_pos = random_pos
 
         # Q-Learning algorithm instance
         self.qlearner = QLearner(True)
@@ -50,6 +52,9 @@ class InferenceNode:
 
         # initial position
         self.robot_spawned = False
+
+        # goal reached flag
+        self.goal_reached = False
 
 
     def run(self):
@@ -76,7 +81,7 @@ class InferenceNode:
             Set robot to initial position 
         """
 
-        if self.random_init_position_flag:
+        if self.random_init_pos:
             ckpt, x, y, theta = get_random_position()
         else:
             ckpt, x, y, theta = get_init_position()
@@ -88,9 +93,9 @@ class InferenceNode:
 
     def scan_callback(self, lidarMsg: LaserScan):
         
-        if status == 'Goal position reached!':
+        if self.goal_reached:
             self.action_pub.publish(String("stop"))
-            rospy.signal_shutdown('End of testing!')
+            rospy.signal_shutdown('Goal reached! End of testing!')
 
         # spawning robot on initial position
         if not self.robot_spawned:
@@ -129,7 +134,8 @@ class InferenceNode:
 
             # feedback control algorithm -> if there is a clear path to the goal
             elif not object_nearby or goal_near:
-                status = robotFeedbackControl(x, y, theta, self.x_goal, self.y_goal, math.radians(self.theta_goal))
+                v_scal, w_scal, self.goal_reached = feedback_control(x, y, theta, self.x_goal, self.y_goal, math.radians(self.theta_goal))
+                self.action_pub.publish(String(str(v_scal) + "_" + str(w_scal)))
 
             # Q-learning algorithm inference -> 
             else:
@@ -143,24 +149,12 @@ if __name__ == '__main__':
         arg_formatter = argparse.ArgumentDefaultsHelpFormatter
         parser = argparse.ArgumentParser(formatter_class=arg_formatter)
         parser.add_argument("--random-pos", dest="random_pos", type=bool, default=False)
-        parser.add_argument("--alpha", dest="alpha", type=float, default=0.5)
-        parser.add_argument("--gamma", dest="gamma", type=float, default=0.9)
-        parser.add_argument("--epsilon", dest="epsilon", type=float, default=0.9)
-        parser.add_argument("--epsilon-grad", dest="epsilon_grad", type=float, default=0.96)
-        parser.add_argument("--epsilon-min", dest="epsilon_min", type=float, default=0.05)
 
         args = parser.parse_args(rospy.myargv()[1:])
 
-        load_q_table = True if str(args.load_q_table) in ["True", "true"] else False
-        max_episodes = int(args.max_episodes)
-        max_steps = int(args.max_steps)
         random_pos = True if str(args.random_pos) in ["True", "true"] else False
-        alpha = float(args.alpha)
-        gamma_ = float(args.gamma)
-        epsilon = float(args.epsilon)
-        epsilon_grad = float(args.epsilon_grad)
-        epsilon_min = float(args.epsilon_min)
-        node = InferenceNode()
+
+        node = InferenceNode(random_pos)
         node.run()
 
     except rospy.ROSInterruptException:

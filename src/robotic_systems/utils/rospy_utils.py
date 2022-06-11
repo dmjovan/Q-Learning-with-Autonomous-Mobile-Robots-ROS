@@ -159,4 +159,35 @@ def get_init_position() -> tuple:
     checkpoint.twist.angular.z = 0.0
 
     return checkpoint, X_INIT, Y_INIT, THETA_INIT
+
+
+def feedback_control(x, y, theta, x_goal, y_goal, theta_goal) -> tuple:
+    """ Feedback (FB) robot control algorithm """
+
+    # theta goal normalization
+    if theta_goal >= np.pi:
+        theta_goal_norm = theta_goal - 2 * np.pi
+    else:
+        theta_goal_norm = theta_goal
+
+    rho = np.sqrt(pow((x_goal - x), 2) + pow((y_goal - y), 2))
+    lamdba_ = math.atan2((y_goal - y), (x_goal - x ))
+
+    alpha = (lamdba_ -  theta + np.pi) % (2 * np.pi) - np.pi
+    beta = (theta_goal - lamdba_ + np.pi) % (2 * np.pi) - np.pi
+
+    if rho < GOAL_DIST_THRESHOLD and math.degrees(abs(theta-theta_goal_norm)) < GOAL_ANGLE_THRESHOLD:
+        goal_reached = True
+        v = 0
+        w = 0
+        v_scal = 0
+        w_scal = 0
+    else:
+        goal_reached = False
+        v = K_RO * rho
+        w = K_ALPHA * alpha + K_BETA * beta
+        v_scal = v / abs(v) * V_CONST
+        w_scal = w / abs(v) * V_CONST
+
+    return v_scal, w_scal, goal_reached
     
