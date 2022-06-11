@@ -222,6 +222,9 @@ class TrainingNode:
                     state_ind, x1, x2, x3, x4 = LidarHelper.discretize_lidar_scan(self.qlearner.state_space, lidar)
                     self.crash = LidarHelper.check_crash(lidar)
 
+                    # get next action using epsilon-greedy policy
+                    action = self.qlearner.epsilon_greedy_exploration(state_ind)
+
                     # get reward
                     reward = self.qlearner.get_reward(action, self.prev_action, lidar, self.prev_lidar, self.crash)
                     
