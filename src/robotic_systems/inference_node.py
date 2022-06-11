@@ -109,6 +109,7 @@ class InferenceNode:
             self.robot_spawned = self.check_initial_position(x_init, y_init, theta_init)
 
             rospy.loginfo(f"Robot spawned on initial position: x = {x_init}, y = {y_init}, theta = {theta_init}")
+            rospy.loginfo(f"Robots goal position is: x = {self.x_goal}, y = {self.y_goal}, theta = {self.theta_goal}}")
 
         else:
             odomMsg = rospy.wait_for_message('/odom', Odometry)
