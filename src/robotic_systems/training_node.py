@@ -28,8 +28,8 @@ class TrainingNode:
                        alpha: float = 0.5,
                        gamma: float = 0.9,
                        epsilon: float = 0.9,
-                       epsilon_grad: float = 0.96,
-                       epsilon_min: float = 0.05, ) -> None:
+                       epsilon_grad: float = 0.999,
+                       epsilon_min: float = 0.025) -> None:
 
         rospy.init_node('TrainingNode', anonymous = False)
         self.rate = rospy.Rate(10)
@@ -258,8 +258,8 @@ if __name__ == '__main__':
         parser.add_argument("--alpha", dest="alpha", type=float, default=0.5)
         parser.add_argument("--gamma", dest="gamma", type=float, default=0.9)
         parser.add_argument("--epsilon", dest="epsilon", type=float, default=0.9)
-        parser.add_argument("--epsilon-grad", dest="epsilon_grad", type=float, default=0.96)
-        parser.add_argument("--epsilon-min", dest="epsilon_min", type=float, default=0.05)
+        parser.add_argument("--epsilon-grad", dest="epsilon_grad", type=float, default=0.999)
+        parser.add_argument("--epsilon-min", dest="epsilon_min", type=float, default=0.025)
 
         args = parser.parse_args(rospy.myargv()[1:])
 
