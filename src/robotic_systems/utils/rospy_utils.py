@@ -1,3 +1,4 @@
+from typing import Optional
 import rospy
 import math
 import numpy as np
@@ -129,7 +130,9 @@ def get_random_position() -> tuple:
 
     return checkpoint, x, y, theta
 
-def get_init_position() -> tuple:
+def get_init_position(x_init: Optional[float] = None,
+                      y_init: Optional[float] = None,
+                      theta_init: Optional[float] = None) -> tuple:
 
     """
         Setting robot position.
@@ -139,11 +142,15 @@ def get_init_position() -> tuple:
 
     checkpoint.model_name = 'turtlebot3_burger'
 
-    checkpoint.pose.position.x = X_INIT
-    checkpoint.pose.position.y = Y_INIT
+    x_init = x_init if x_init is not None else X_INIT
+    y_init = y_init if y_init is not None else Y_INIT
+    theta_init = theta_init if theta_init is not None else THETA_INIT
+
+    checkpoint.pose.position.x = x_init
+    checkpoint.pose.position.y = y_init
     checkpoint.pose.position.z = 0.0
 
-    [x_q, y_q, z_q, w_q] = quaternion_from_euler(0.0, 0.0, math.radians(THETA_INIT))
+    [x_q, y_q, z_q, w_q] = quaternion_from_euler(0.0, 0.0, math.radians(theta_init))
 
     checkpoint.pose.orientation.x = x_q
     checkpoint.pose.orientation.y = y_q
@@ -158,7 +165,7 @@ def get_init_position() -> tuple:
     checkpoint.twist.angular.y = 0.0
     checkpoint.twist.angular.z = 0.0
 
-    return checkpoint, X_INIT, Y_INIT, THETA_INIT
+    return checkpoint, x_init, y_init, theta_init
 
 
 def feedback_control(x, y, theta, x_goal, y_goal, theta_goal) -> tuple:

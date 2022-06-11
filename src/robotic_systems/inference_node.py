@@ -84,7 +84,7 @@ class InferenceNode:
         if self.random_init_pos:
             ckpt, x, y, theta = get_random_position()
         else:
-            ckpt, x, y, theta = get_init_position()
+            ckpt, x, y, theta = get_init_position(self.x_init, self.y_init, self.theta_init)
 
         self.robot_position_pub.publish(ckpt)
 
