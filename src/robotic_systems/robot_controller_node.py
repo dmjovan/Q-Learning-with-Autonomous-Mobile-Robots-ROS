@@ -32,7 +32,7 @@ class RobotControllerNode:
     def action_callback(self, data):
 
         rospy.loginfo(f"Executing action {str(data.data).upper()}")
-        getattr(self, "do_", str(data.data))()
+        getattr(self, f"do_{str(data.data)}")()
 
 
     def do_forward(self) -> None:
