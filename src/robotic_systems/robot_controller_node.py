@@ -23,6 +23,12 @@ class RobotControllerNode:
         rospy.Subscriber('/robot_action', String, self.action_callback)
 
 
+    def run(self):
+
+        while not rospy.is_shutdown():
+            self.rate.sleep()
+
+
     def action_callback(self, data):
 
         rospy.loginfo(f"Executing action {str(data.data).upper()}")
