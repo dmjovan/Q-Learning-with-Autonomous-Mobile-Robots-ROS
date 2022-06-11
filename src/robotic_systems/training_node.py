@@ -133,7 +133,7 @@ class TrainingNode:
         # end of learning -> maximum episodes reached
         if self.episode > self.max_episodes:
 
-            rospy.signal_shutdown("End of learning process - Shutting down TrainingNode")
+            rospy.signal_shutdown("End of learning process - Shutting down Training node")
 
         else:
 
@@ -283,7 +283,7 @@ if __name__ == '__main__':
                             epsilon_grad=epsilon_grad,
                             epsilon_min=epsilon_min)
 
-        rospy.loginfo("Starting training node!")
+        rospy.loginfo("Starting Training node!")
         node.run()
 
     except rospy.ROSInterruptException:

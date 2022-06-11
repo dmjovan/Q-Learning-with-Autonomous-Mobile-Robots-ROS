@@ -131,15 +131,18 @@ class InferenceNode:
             # stop the testing
             if crash:
                 self.action_pub.publish(String("stop"))
+                rospy.loginfo("Crash! Stopping robot. Terminating inference node.")
                 rospy.signal_shutdown('Crash! End of testing!')
 
             # feedback control algorithm -> if there is a clear path to the goal
             elif not object_nearby or goal_near:
+                rospy.loginfo("Feedback robot control ...")
                 v_scal, w_scal, self.goal_reached = feedback_control(x, y, theta, self.x_goal, self.y_goal, math.radians(self.theta_goal))
                 self.action_pub.publish(String(str(v_scal) + "_" + str(w_scal)))
 
             # Q-learning algorithm inference -> 
             else:
+                rospy.loginfo("Q-Learning inference for robot control ...")
                 action = self.qlearner.get_best_action(state_ind)
                 self.action_pub.publish(ACTION_MAP[action])
 
@@ -155,11 +158,10 @@ if __name__ == '__main__':
 
         random_pos = True if str(args.random_pos) in ["True", "true"] else False
 
-        node = InferenceNode(random_pos)
+        node = InferenceNode(random_pos=random_pos)
         node.run()
 
     except rospy.ROSInterruptException:
-
         node.action_pub.publish(String("stop"))
-        print('Inference node terminated!')
+        rospy.loginfo("Inference node terminated!")
         pass
