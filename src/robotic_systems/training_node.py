@@ -5,6 +5,7 @@ import math
 import rospy
 import argparse
 import numpy as np
+from pathlib import Path
 
 from std_msgs.msg import String
 from nav_msgs.msg import Odometry
@@ -36,12 +37,12 @@ class TrainingNode:
         self.robot_position_pub = rospy.Publisher('/gazebo/set_model_state', ModelState, queue_size = 10)
         self.action_pub = rospy.Publisher('/robot_action', String, queue_size = 10)
 
+        # data & logs dir
+        self.log_file_dir = os.path.join(PROJECT_ROOT, LOG_FILE_DIR)
+        Path(self.log_file_dir).mkdir(exist_ok=True, parents=True)
+
+        # subscriber to laser data
         rospy.Subscriber('/scan', LaserScan, self.scan_callback)
-
-        self.log_file_dir = "/home/ros/ROS_Workspace/ROS_Projects/src/Q-Learning-with-Autonomous-Mobile-Robots-ROS/src/robotic_systems/results"
-
-        if not os.path.exists(self.log_file_dir): 
-            os.makedirs(self.log_file_dir)
 
         # parameters
         self.max_episodes = max_episodes
@@ -85,10 +86,6 @@ class TrainingNode:
 
         while not rospy.is_shutdown():
             self.rate.sleep()
-    
-    def save_data(self, path: str, data: np.ndarray) -> None: 
-        np.savetxt(path, data, delimiter = ' , ')
-
 
     def check_initial_position(self, x_init: float, y_init: float, theta_init: float) -> bool:
 
@@ -101,7 +98,6 @@ class TrainingNode:
         else:
             return False
 
-    
     def reset_position(self) -> tuple:
 
         """ 
@@ -117,21 +113,22 @@ class TrainingNode:
 
         return x, y, theta
 
+    def save_data(self):
+
+        if self.episode % 50 or self.episode >= self.max_episodes:
+            np.savetxt(Q_TABLE_PATH, self.qlearner.Q_table, delimiter = ' , ')
+            np.savetxt(STEPS_PER_EPISODE_PATH, self.steps_per_episode, delimiter = ' , ')
+            np.savetxt(REWARD_PER_EPISODE_PATH, self.reward_per_episode, delimiter = ' , ')
+            np.savetxt(EPSILON_PER_EPISODE_PATH, self.epsilon_per_episode, delimiter = ' , ')
+            np.savetxt(REWARD_MIN_PER_EPISODE_PATH, self.reward_min_per_episode, delimiter = ' , ')
+            np.savetxt(REWARD_MAX_PER_EPISODE_PATH, self.reward_max_per_episode, delimiter = ' , ')
+            np.savetxt(REWARD_AVG_PER_EPISODE_PATH, self.reward_avg_per_episode, delimiter = ' , ')
+
 
     def scan_callback(self, lidarMsg) -> None:
     
-
         # end of learning -> maximum episodes reached
         if self.episode > self.max_episodes:
-
-            # save data to file
-            self.save_data(os.path.join(self.log_file_dir, "/Q_table.csv"), self.qlearner.Q_table)
-            self.save_data(os.path.join(self.log_file_dir, "/steps_per_episode.csv"), self.steps_per_episode)
-            self.save_data(os.path.join(self.log_file_dir, "/reward_per_episode.csv"), self.reward_per_episode)
-            self.save_data(os.path.join(self.log_file_dir, "/epsilon_per_episode.csv"), self.epsilon_per_episode)
-            self.save_data(os.path.join(self.log_file_dir, "/reward_min_per_episode.csv"), self.reward_min_per_episode)
-            self.save_data(os.path.join(self.log_file_dir, "/reward_max_per_episode.csv"), self.reward_max_per_episode)
-            self.save_data(os.path.join(self.log_file_dir, "/reward_avg_per_episode.csv"), self.reward_avg_per_episode)
 
             rospy.signal_shutdown("End of learning process - Shutting down TrainingNode")
 
@@ -242,6 +239,8 @@ class TrainingNode:
                     self.prev_lidar = lidar
                     self.prev_action = action
                     self.prev_state_ind = state_ind
+
+        self.save_logs()
 
         
 

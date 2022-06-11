@@ -24,8 +24,7 @@ class QLearner:
             rospy.loginfo("Created Q table")
         else:
             try:
-                self.Q_table = self.read_Q_table(
-                    path="/home/ros/ROS_Workspace/ROS_Projects/src/Q-Learning-with-Autonomous-Mobile-Robots-ROS/src/robotic_systems/results/Q_table.csv")
+                self.Q_table = self.read_Q_table(path=Q_TABLE_PATH)
                 rospy.loginfo("Loaded Q table")
 
             except FileNotFoundError:
