@@ -36,6 +36,8 @@ class TrainingNode:
         self.robot_position_pub = rospy.Publisher('/gazebo/set_model_state', ModelState, queue_size = 10)
         self.action_pub = rospy.Publisher('/robot_action', String, queue_size = 10)
 
+        rospy.Subscriber('/scan', LaserScan, self.scan_callback)
+
         self.log_file_dir = "/home/ros/ROS_Workspace/ROS_Projects/src/Q-Learning-with-Autonomous-Mobile-Robots-ROS/src/robotic_systems/results"
 
         if not os.path.exists(self.log_file_dir): 
@@ -63,8 +65,26 @@ class TrainingNode:
         self.reward_min_per_episode = [] # min. reward over episodes
         self.reward_avg_per_episode = [] # avg. reward over episodes
         self.epsilon_per_episode = [] # epislon parameter over episodes
-        self.t_per_episode = [] # episode durations overs episodes
 
+        self.ep_steps = 0
+        self.ep_reward = 0
+        self.episode = 1
+        self.crash = False
+        
+        # initial position
+        self.robot_spawned = False
+        self.first_action_taken = False
+
+        # previous values
+        self.prev_lidar = None
+        self.prev_action = None
+        self.prev_state_ind = None
+
+    
+    def run(self):
+
+        while not rospy.is_shutdown():
+            self.rate.sleep()
     
     def save_data(self, path: str, data: np.ndarray) -> None: 
         np.savetxt(path, data, delimiter = ' , ')
@@ -98,158 +118,127 @@ class TrainingNode:
         return x, y, theta
 
 
-    def run(self) -> None:
-        
-        ep_steps = 0
-        ep_reward = 0
-        episode = 1
-        crash = False
-        
-        # initial position
-        robot_spawned = False
-        first_action_taken = False
+    def scan_callback(self, lidarMsg) -> None:
+    
 
-        # init time
-        t_0 = rospy.Time.now()
-        t_start = rospy.Time.now()
+        # end of learning -> maximum episodes reached
+        if self.episode > self.max_episodes:
 
-        # init timer
-        while not (t_start > t_0):
-            t_start = rospy.Time.now()
+            # save data to file
+            self.save_data(os.path.join(self.log_file_dir, "/Q_table.csv"), self.qlearner.Q_table)
+            self.save_data(os.path.join(self.log_file_dir, "/steps_per_episode.csv"), self.steps_per_episode)
+            self.save_data(os.path.join(self.log_file_dir, "/reward_per_episode.csv"), self.reward_per_episode)
+            self.save_data(os.path.join(self.log_file_dir, "/epsilon_per_episode.csv"), self.epsilon_per_episode)
+            self.save_data(os.path.join(self.log_file_dir, "/reward_min_per_episode.csv"), self.reward_min_per_episode)
+            self.save_data(os.path.join(self.log_file_dir, "/reward_max_per_episode.csv"), self.reward_max_per_episode)
+            self.save_data(os.path.join(self.log_file_dir, "/reward_avg_per_episode.csv"), self.reward_avg_per_episode)
 
-        t_ep = t_start
-        t_step = t_start
+            rospy.signal_shutdown("End of learning process - Shutting down TrainingNode")
 
-        while not rospy.is_shutdown():
-            lidarMSg = rospy.wait_for_message('/scan', LaserScan)
+        else:
 
-            # secure the minimum time interval between 2 actions
-            # step_time = (rospy.Time.now() - t_step).to_sec()
-            # if step_time > self.min_time_between_actions:
-            #     t_step = rospy.Time.now()
+            # end of episode -> there has been either a crash or number of steps in this episode has reached the maximum
+            if self.crash or self.ep_steps >= self.max_steps_per_episode:
 
-            # end of learning -> maximum episodes reached
-            if episode > self.max_episodes:
+                if self.crash:
+                    rospy.loginfo("Crash happened!")
 
-                # save data to file
-                self.save_data(os.path.join(self.log_file_dir, "/Q_table.csv"), self.qlearner.Q_table)
-                self.save_data(os.path.join(self.log_file_dir, "/steps_per_episode.csv"), self.steps_per_episode)
-                self.save_data(os.path.join(self.log_file_dir, "/reward_per_episode.csv"), self.reward_per_episode)
-                self.save_data(os.path.join(self.log_file_dir, "/epsilon_per_episode.csv"), self.epsilon_per_episode)
-                self.save_data(os.path.join(self.log_file_dir, "/reward_min_per_episode.csv"), self.reward_min_per_episode)
-                self.save_data(os.path.join(self.log_file_dir, "/reward_max_per_episode.csv"), self.reward_max_per_episode)
-                self.save_data(os.path.join(self.log_file_dir, "/reward_avg_per_episode.csv"), self.reward_avg_per_episode)
-                self.save_data(os.path.join(self.log_file_dir, "/t_per_episode.csv"), self.t_per_episode)
+                else:
+                    rospy.loginfo("Maximum steps per episode reached!")
 
-                rospy.signal_shutdown("End of learning process - Shutting down TrainingNode")
+                # stopping the robot
+                self.action_pub.publish(String("stop"))
 
+                # adding data into lists
+                self.steps_per_episode.append(self.ep_steps)
+                self.reward_per_episode.append(self.ep_reward)
+                self.reward_min_per_episode.append( np.min(self.ep_reward_lst))
+                self.reward_max_per_episode.append(np.max(self.ep_reward_lst))
+                self.reward_avg_per_episode.append( np.mean(self.ep_reward_lst))
+                self.epsilon_per_episode.append(self.qlearner.epsilon)
+
+                # reseting variables
+                self.ep_reward_lst = []
+                self.ep_steps = 0
+                self.ep_reward = 0
+                self.crash = False
+                self.robot_spawned = False
+                self.first_action_taken = False
+                self.qlearner.update_epsilon()
+
+                rospy.loginfo(f"Finished episode {self.episode}/{self.max_episodes}")
+                self.episode = self.episode + 1
+
+            
             else:
-                ep_time = (rospy.Time.now() - t_ep).to_sec()
+                self.ep_steps = self.ep_steps + 1
 
-                # end of episode -> there has been either a crash or number of steps in this episode has reached the maximum
-                if crash or ep_steps >= self.max_steps_per_episode:
+                # spawning robot on initial position
+                if not self.robot_spawned:
 
-                    if crash:
-                        rospy.loginfo("Crash happened!")
-
-                    else:
-                        rospy.loginfo("Maximum steps per episode reached!")
+                    rospy.loginfo("Spawning robot...")
 
                     # stopping the robot
                     self.action_pub.publish(String("stop"))
 
-                    # adding data into lists
-                    self.steps_per_episode.append(ep_steps)
-                    self.reward_per_episode.append(ep_reward)
-                    self.reward_min_per_episode.append( np.min(self.ep_reward_lst))
-                    self.reward_max_per_episode.append(np.max(self.ep_reward_lst))
-                    self.reward_avg_per_episode.append( np.mean(self.ep_reward_lst))
-                    self.epsilon_per_episode.append(self.qlearner.epsilon)
-                    self.t_per_episode.append(ep_time)
+                    self.ep_steps = self.ep_steps - 1
+                    self.first_action_taken = False
 
-                    # reseting variables
-                    t_ep = rospy.Time.now()
-                    self.ep_reward_lst = []
-                    ep_steps = 0
-                    ep_reward = 0
-                    crash = False
-                    robot_spawned = False
-                    first_action_taken = False
-                    self.qlearner.update_epsilon()
+                    x_init, y_init, theta_init = self.reset_position()
 
-                    rospy.loginfo(f"Finished episode {episode}/{self.max_episodes}")
-                    episode = episode + 1
+                    self.robot_spawned = self.check_initial_position(x_init, y_init, theta_init)
 
-                
-                else:
-                    ep_steps = ep_steps + 1
+                    rospy.loginfo(f"Robot spawned on initial position: x = {x_init}, y = {y_init}, theta = {theta_init}")
 
-                    # spawning robot on initial position
-                    if not robot_spawned:
+                # taking first action
+                elif not self.first_action_taken:
 
-                        rospy.loginfo("Spawning robot...")
+                    rospy.loginfo("Taking first action")
 
-                        # stopping the robot
-                        self.action_pub.publish(String("stop"))
+                    # taking measurements and deriving them
+                    lidar, angles = LidarHelper.scan_to_arr(lidarMsg)
+                    state_ind, x1, x2, x3, x4 = LidarHelper.discretize_lidar_scan(self.qlearner.state_space, lidar)
+                    self.crash = LidarHelper.check_crash(lidar)
 
-                        ep_steps = ep_steps - 1
-                        first_action_taken = False
+                    # get next action using epsilon-greedy policy
+                    action = self.qlearner.epsilon_greedy_exploration(state_ind)
 
-                        x_init, y_init, theta_init = self.reset_position()
+                    # execute the selected action
+                    self.action_pub.publish(String(ACTION_MAP[action]))
 
-                        robot_spawned = self.check_initial_position(x_init, y_init, theta_init)
+                    self.prev_lidar = lidar
+                    self.prev_action = action
+                    self.prev_state_ind = state_ind
 
-                        rospy.loginfo(f"Robot spawned on initial position: x = {x_init}, y = {y_init}, theta = {theta_init}")
+                    self.first_action_taken = True
 
-                    # taking first action
-                    elif not first_action_taken:
+                # normal flow of the algorithm
+                else:                      
 
-                        rospy.loginfo("Taking first action")
+                    rospy.loginfo(f"Executing step {self.ep_steps}/{self.max_steps_per_episode}")
 
-                        # taking measurements and deriving them
-                        lidar, angles = LidarHelper.scan_to_arr(lidarMSg)
-                        state_ind, x1, x2, x3, x4 = LidarHelper.discretize_lidar_scan(self.qlearner.state_space, lidar)
-                        crash = LidarHelper.check_crash(lidar)
+                    # taking measurements and deriving them
+                    lidar, angles = LidarHelper.scan_to_arr(lidarMsg)
+                    state_ind, x1, x2, x3, x4 = LidarHelper.discretize_lidar_scan(self.qlearner.state_space, lidar)
+                    self.crash = LidarHelper.check_crash(lidar)
 
-                        # get next action using epsilon-greedy policy
-                        action = self.qlearner.epsilon_greedy_exploration(state_ind)
+                    # get reward
+                    reward = self.qlearner.get_reward(action, self.prev_action, lidar, self.prev_lidar, self.crash)
+                    
+                    # update Q-table
+                    self.qlearner.update_Q_table(self.prev_state_ind, action, reward, state_ind)
 
-                        # execute the selected action
-                        self.action_pub.publish(String(ACTION_MAP[action]))
+                    # get next action using epsilon-greedy policy
+                    action = self.qlearner.epsilon_greedy_exploration(state_ind)
 
-                        prev_lidar = lidar
-                        prev_action = action
-                        prev_state_ind = state_ind
+                    # execute the selected action
+                    self.action_pub.publish(String(ACTION_MAP[action]))
 
-                        first_action_taken = True
-
-                    # normal flow of the algorithm
-                    else:                      
-
-                        rospy.loginfo(f"Executing step {ep_steps}/{self.max_steps_per_episode}")
-
-                        # taking measurements and deriving them
-                        lidar, angles = LidarHelper.scan_to_arr(lidarMSg)
-                        state_ind, x1, x2, x3, x4 = LidarHelper.discretize_lidar_scan(self.qlearner.state_space, lidar)
-                        crash = LidarHelper.check_crash(lidar)
-
-                        # get reward
-                        reward = self.qlearner.get_reward(action, prev_action, lidar, prev_lidar, crash)
-                        
-                        # update Q-table
-                        self.qlearner.update_Q_table(prev_state_ind, action, reward, state_ind)
-
-                        # get next action using epsilon-greedy policy
-                        action = self.qlearner.epsilon_greedy_exploration(state_ind)
-
-                        # execute the selected action
-                        self.action_pub.publish(String(ACTION_MAP[action]))
-
-                        ep_reward += reward
-                        self.ep_reward_lst.append(reward)
-                        prev_lidar = lidar
-                        prev_action = action
-                        prev_state_ind = state_ind
+                    self.ep_reward += reward
+                    self.ep_reward_lst.append(reward)
+                    self.prev_lidar = lidar
+                    self.prev_action = action
+                    self.prev_state_ind = state_ind
 
         
 
