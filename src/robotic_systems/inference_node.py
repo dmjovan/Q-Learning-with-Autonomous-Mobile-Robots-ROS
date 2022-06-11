@@ -136,13 +136,13 @@ class InferenceNode:
 
             # feedback control algorithm -> if there is a clear path to the goal
             elif not object_nearby or goal_near:
-                rospy.loginfo("Feedback robot control ...")
+                rospy.loginfo("Using feedback control algorithm for robot control ...")
                 v_scal, w_scal, self.goal_reached = feedback_control(x, y, theta, self.x_goal, self.y_goal, math.radians(self.theta_goal))
                 self.action_pub.publish(String(str(v_scal) + "_" + str(w_scal)))
 
             # Q-learning algorithm inference -> 
             else:
-                rospy.loginfo("Q-Learning inference for robot control ...")
+                rospy.loginfo("Using Q-Learning inference for robot control ...")
                 action = self.qlearner.get_best_action(state_ind)
                 self.action_pub.publish(ACTION_MAP[action])
 
