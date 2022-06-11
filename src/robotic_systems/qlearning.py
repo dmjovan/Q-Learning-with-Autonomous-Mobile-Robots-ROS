@@ -5,12 +5,7 @@ import random
 import numpy as np
 from itertools import product
 
-STATE_SPACE_IND_MAX = 143
-STATE_SPACE_IND_MIN = 0
-
-ANGLE_MAX = 359
-ANGLE_MIN = 0
-HORIZON_WIDTH = 75
+from robotic_systems.utils.constants import *
 
 class QLearner:
 

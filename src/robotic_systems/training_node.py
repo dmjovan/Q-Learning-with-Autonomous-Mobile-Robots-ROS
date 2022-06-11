@@ -6,17 +6,16 @@ import rospy
 import argparse
 import numpy as np
 
+from std_msgs.msg import String
 from nav_msgs.msg import Odometry
 from sensor_msgs.msg import LaserScan
 
 from robotic_systems.qlearning import QLearner
-from robotic_systems.robot_controller import RobotController
 from robotic_systems.lidar_helper import LidarHelper
 
-# initial position if not random position
-X_INIT = -0.4
-Y_INIT = -0.4
-THETA_INIT = 45.0
+from robotic_systems.utils.constants import *
+from robotic_systems.utils.rospy_utils import *
+
 
 class TrainingNode:
 
@@ -34,7 +33,8 @@ class TrainingNode:
         rospy.init_node('TrainingNode', anonymous = False)
         self.rate = rospy.Rate(10)
 
-        self.robot_controller = RobotController()
+        self.robot_position_pub = rospy.Publisher('/gazebo/set_model_state', ModelState, queue_size = 10)
+        self.action_pub = rospy.Publisher('/robot_action', String, queue_size = 10)
 
         self.log_file_dir = "/home/ros/ROS_Workspace/ROS_Projects/src/Q-Learning-with-Autonomous-Mobile-Robots-ROS/src/robotic_systems/results"
 
@@ -73,13 +73,29 @@ class TrainingNode:
     def check_initial_position(self, x_init: float, y_init: float, theta_init: float) -> bool:
 
         odomMsg = rospy.wait_for_message('/odom', Odometry)
-        x, y = self.robot_controller.get_position(odomMsg)
-        theta = math.degrees(self.robot_controller.get_rotation(odomMsg))
+        x, y = get_position(odomMsg)
+        theta = math.degrees(get_rotation(odomMsg))
 
         if abs(x-x_init) < 0.01 and abs(y-y_init) < 0.01 and abs(theta-theta_init) < 1:
             return True
         else:
             return False
+
+    
+    def reset_position(self) -> tuple:
+
+        """ 
+            Set robot to initial position 
+        """
+
+        if self.random_init_position_flag:
+            ckpt, x, y, theta = get_random_position()
+        else:
+            ckpt, x, y, theta = get_init_position()
+
+        self.robot_position_pub.publish(ckpt)
+
+        return x, y, theta
 
 
     def run(self) -> None:
@@ -140,7 +156,7 @@ class TrainingNode:
                         rospy.loginfo("Maximum steps per episode reached!")
 
                     # stopping the robot
-                    self.robot_controller.stop()
+                    self.action_pub.publish(String("stop"))
 
                     # adding data into lists
                     self.steps_per_episode.append(ep_steps)
@@ -174,16 +190,12 @@ class TrainingNode:
                         rospy.loginfo("Spawning robot...")
 
                         # stopping the robot
-                        self.robot_controller.stop()
+                        self.action_pub.publish(String("stop"))
 
                         ep_steps = ep_steps - 1
                         first_action_taken = False
 
-                        if self.random_init_position_flag:
-                            x_init, y_init, theta_init = self.robot_controller.set_random_position()
-
-                        else:
-                            x_init, y_init, theta_init = self.robot_controller.set_position(X_INIT, Y_INIT, THETA_INIT)
+                        x_init, y_init, theta_init = self.reset_position()
 
                         robot_spawned = self.check_initial_position(x_init, y_init, theta_init)
 
@@ -203,7 +215,7 @@ class TrainingNode:
                         action = self.qlearner.epsilon_greedy_exploration(state_ind)
 
                         # execute the selected action
-                        self.robot_controller.execute_action(action)
+                        self.action_pub.publish(String(ACTION_MAP[action]))
 
                         prev_lidar = lidar
                         prev_action = action
@@ -231,7 +243,7 @@ class TrainingNode:
                         action = self.qlearner.epsilon_greedy_exploration(state_ind)
 
                         # execute the selected action
-                        self.robot_controller.execute_action(action)
+                        self.action_pub.publish(String(ACTION_MAP[action]))
 
                         ep_reward += reward
                         self.ep_reward_lst.append(reward)
