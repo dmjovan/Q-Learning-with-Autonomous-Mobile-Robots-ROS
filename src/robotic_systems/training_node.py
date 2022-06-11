@@ -87,6 +87,7 @@ class TrainingNode:
         while not rospy.is_shutdown():
             self.rate.sleep()
 
+
     def check_initial_position(self, x_init: float, y_init: float, theta_init: float) -> bool:
 
         odomMsg = rospy.wait_for_message('/odom', Odometry)
@@ -97,6 +98,7 @@ class TrainingNode:
             return True
         else:
             return False
+
 
     def reset_position(self) -> tuple:
 
@@ -113,6 +115,7 @@ class TrainingNode:
 
         return x, y, theta
 
+
     def save_data(self):
 
         if self.episode % 50 or self.episode >= self.max_episodes:
@@ -125,7 +128,7 @@ class TrainingNode:
             np.savetxt(REWARD_AVG_PER_EPISODE_PATH, self.reward_avg_per_episode, delimiter = ' , ')
 
 
-    def scan_callback(self, lidarMsg) -> None:
+    def scan_callback(self, lidarMsg: LaserScan) -> None:
     
         # end of learning -> maximum episodes reached
         if self.episode > self.max_episodes:
@@ -240,10 +243,9 @@ class TrainingNode:
                     self.prev_action = action
                     self.prev_state_ind = state_ind
 
-        self.save_logs()
+        self.save_data()
 
         
-
 if __name__ == '__main__':
 
     try:
@@ -286,4 +288,6 @@ if __name__ == '__main__':
 
     except rospy.ROSInterruptException:
         rospy.loginfo("Training node terminated!")
+        node.action_pub.publish(String("stop"))
+        node.save_data()
         pass

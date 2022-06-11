@@ -161,3 +161,17 @@ class LidarHelper:
             return True
         else:
             return False
+
+
+    @staticmethod
+    def check_goal_near(x: float, y: float, x_goal: float, y_goal: float) -> bool:
+
+        """
+            Checking if current robot position is near by goal. 
+        """
+
+        rho = math.sqrt(pow((x_goal - x), 2) + pow((y_goal - y), 2))
+        if rho < 0.3:
+            return True
+        else:
+            return False

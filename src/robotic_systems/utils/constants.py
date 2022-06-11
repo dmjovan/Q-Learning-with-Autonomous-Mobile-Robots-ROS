@@ -25,6 +25,14 @@ K_ALPHA = 15
 K_BETA = -3
 V_CONST = 0.1 # [m/s]
 
+PATH_IND = 4
+INIT_POSITIONS_X = [ -0.7, -0.7, -0.5, -1, -2]
+INIT_POSITIONS_Y = [ -0.7, 0.7, 1, -2, 1]
+INIT_POSITIONS_THETA = [ 45, -45, -120, -90, 150]
+GOAL_POSITIONS_X = [ 2.0, 2.0, 0.5, 1, 2]
+GOAL_POSITIONS_Y = [ 1.0, -1.0, -1.9, 2, -1,]
+GOAL_POSITIONS_THETA = [ 25.0, -40.0, -40, 60, -30,]
+
 # Goal reaching threshold
 GOAL_DIST_THRESHOLD = 0.1 # [m]
 GOAL_ANGLE_THRESHOLD = 15 # [degrees]
