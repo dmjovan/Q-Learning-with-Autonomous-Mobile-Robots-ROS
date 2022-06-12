@@ -21,15 +21,15 @@ from robotic_systems.utils.rospy_utils import *
 class TrainingNode:
 
     def __init__(self, load_q_table: bool = False, 
-                       max_episodes: int = 400,
+                       max_episodes: int = 500,
                        max_steps_per_episode: int = 500,
                        min_time_between_actions: float = 0.0,
                        random_init_position_flag: bool = False,
                        alpha: float = 0.5,
                        gamma: float = 0.9,
                        epsilon: float = 0.9,
-                       epsilon_grad: float = 0.999,
-                       epsilon_min: float = 0.025) -> None:
+                       epsilon_grad: float = 0.96,
+                       epsilon_min: float = 0.05) -> None:
 
         rospy.init_node('TrainingNode', anonymous = False)
         self.rate = rospy.Rate(10)
@@ -252,14 +252,14 @@ if __name__ == '__main__':
         arg_formatter = argparse.ArgumentDefaultsHelpFormatter
         parser = argparse.ArgumentParser(formatter_class=arg_formatter)
         parser.add_argument("--load-q-table", dest="load_q_table", type=bool, default=False)
-        parser.add_argument("--max-episodes", dest="max_episodes", type=int, default=400)
+        parser.add_argument("--max-episodes", dest="max_episodes", type=int, default=500)
         parser.add_argument("--max-steps", dest="max_steps", type=int, default=500)
         parser.add_argument("--random-pos", dest="random_pos", type=bool, default=False)
         parser.add_argument("--alpha", dest="alpha", type=float, default=0.5)
         parser.add_argument("--gamma", dest="gamma", type=float, default=0.9)
         parser.add_argument("--epsilon", dest="epsilon", type=float, default=0.9)
-        parser.add_argument("--epsilon-grad", dest="epsilon_grad", type=float, default=0.999)
-        parser.add_argument("--epsilon-min", dest="epsilon_min", type=float, default=0.025)
+        parser.add_argument("--epsilon-grad", dest="epsilon_grad", type=float, default=0.96)
+        parser.add_argument("--epsilon-min", dest="epsilon_min", type=float, default=0.05)
 
         args = parser.parse_args(rospy.myargv()[1:])
 

@@ -47,4 +47,4 @@ REWARD_MIN_PER_EPISODE_PATH = f"{PROJECT_ROOT}/{LOG_FILE_DIR}/reward_min_per_epi
 REWARD_MAX_PER_EPISODE_PATH = f"{PROJECT_ROOT}/{LOG_FILE_DIR}/reward_max_per_episode.csv"
 REWARD_AVG_PER_EPISODE_PATH = f"{PROJECT_ROOT}/{LOG_FILE_DIR}/reward_avg_per_episode.csv"
 
-
+LAST_Q_TABLE_PATH = f"{PROJECT_ROOT}/data_epsilon_grad_0999_max_episdoes_2000_fixed_start_position/Q_table.csv"
