@@ -33,11 +33,7 @@ class RobotControllerNode:
 
         command = str(data.data)
 
-        if str(data.data) in ["forward", "left", "right", "stop"]:
-            rospy.loginfo(f"Executing action {command.upper()}")
-            getattr(self, f"do_{command}")()
-            
-        else:
+        try:
             v_scal, w_scal = command.split("_")
 
             rospy.loginfo(f"Executing command V: {v_scal}, W: {w_scal}")
@@ -45,7 +41,11 @@ class RobotControllerNode:
             vel_msg = create_vel_msg(float(v_scal), float(w_scal))
             self.robot_velocity_pub.publish(vel_msg)
 
-
+        except ValueError:
+            
+            rospy.loginfo(f"Executing action {command.upper()}")
+            getattr(self, f"do_{command}")()
+            
 
     def do_forward(self) -> None:
 
@@ -85,6 +85,15 @@ class RobotControllerNode:
 
         vel_msg = create_vel_msg(0.0, 0.0)
         self.robot_velocity_pub.publish(vel_msg)
+
+
+    def do_terminate(self):
+
+        """
+            Shutting down.
+        """
+
+        rospy.signal_shutdown("Terminating robot controller")
 
 
 

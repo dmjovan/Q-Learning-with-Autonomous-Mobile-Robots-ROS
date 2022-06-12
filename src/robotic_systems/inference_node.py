@@ -162,6 +162,6 @@ if __name__ == '__main__':
         node.run()
 
     except rospy.ROSInterruptException:
-        node.action_pub.publish(String("stop"))
+        node.action_pub.publish(String("terminate"))
         rospy.loginfo("Inference node terminated!")
         pass

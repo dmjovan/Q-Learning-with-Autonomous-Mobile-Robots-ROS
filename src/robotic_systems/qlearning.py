@@ -24,7 +24,7 @@ class QLearner:
             rospy.loginfo("Created Q table")
         else:
             try:
-                self.Q_table = self.read_Q_table(path=LAST_Q_TABLE_PATH)
+                self.Q_table = self.read_Q_table(path=Q_TABLE_PATH)
                 rospy.loginfo("Loaded Q table")
 
             except FileNotFoundError:

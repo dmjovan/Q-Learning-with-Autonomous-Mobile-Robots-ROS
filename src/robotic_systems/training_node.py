@@ -288,6 +288,6 @@ if __name__ == '__main__':
 
     except rospy.ROSInterruptException:
         rospy.loginfo("Training node terminated!")
-        node.action_pub.publish(String("stop"))
+        node.action_pub.publish(String("terminate"))
         node.save_data()
         pass
