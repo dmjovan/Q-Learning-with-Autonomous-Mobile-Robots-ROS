@@ -1,5 +1,4 @@
 from typing import Optional
-import rospy
 import math
 import numpy as np
 

@@ -1,2 +1,6 @@
 .idea
 venv
+__pycache__
+
+# do not upload experiment output files because of increasing size
+src/robotic_systems/experiments/*
