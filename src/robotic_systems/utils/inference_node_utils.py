@@ -86,7 +86,7 @@ class InferenceNode:
     def scan_callback(self, lidarMsg: LaserScan) -> None:
 
         if self.goal_reached:
-            self.action_pub.publish(String("stop"))
+            self.action_pub.publish(String("terminate"))
             rospy.signal_shutdown('Goal reached! End of testing!')
 
         # spawning robot on initial position
@@ -95,7 +95,7 @@ class InferenceNode:
             rospy.loginfo("Spawning robot...")
 
             # stopping the robot
-            self.action_pub.publish(String("stop"))
+            self.action_pub.publish(String("terminate"))
 
             x_init, y_init, theta_init = self.reset_position()
             self.robot_spawned = self.check_initial_position(x_init, y_init, theta_init)

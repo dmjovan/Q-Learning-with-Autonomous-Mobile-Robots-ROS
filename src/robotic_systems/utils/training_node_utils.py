@@ -194,7 +194,7 @@ class TrainingNode:
                     rospy.loginfo("Spawning robot...")
 
                     # stopping the robot
-                    self.action_pub.publish(String("stop"))
+                    self.action_pub.publish(String("terminate"))
 
                     self.ep_steps = self.ep_steps - 1
                     self.first_action_taken = False
