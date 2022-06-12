@@ -123,7 +123,7 @@ class InferenceNode:
 
             # stop the testing
             if crash:
-                self.action_pub.publish(String("stop"))
+                self.action_pub.publish(String("terminate"))
                 rospy.loginfo("Crash! Stopping robot. Terminating inference node.")
                 rospy.signal_shutdown('Crash! End of testing!')
 
