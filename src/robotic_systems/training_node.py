@@ -147,7 +147,7 @@ class TrainingNode:
                     rospy.loginfo("Maximum steps per episode reached!")
 
                 # stopping the robot
-                self.action_pub.publish(String("stop"))
+                self.action_pub.publish(String("terminate"))
 
                 # adding data into lists
                 self.steps_per_episode.append(self.ep_steps)
@@ -288,6 +288,5 @@ if __name__ == '__main__':
 
     except rospy.ROSInterruptException:
         rospy.loginfo("Training node terminated!")
-        node.action_pub.publish(String("terminate"))
         node.save_data()
         pass
