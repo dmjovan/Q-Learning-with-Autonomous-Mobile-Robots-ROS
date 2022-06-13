@@ -9,10 +9,10 @@ from std_msgs.msg import String
 from nav_msgs.msg import Odometry
 from sensor_msgs.msg import LaserScan
 
-from .qlearning import QLearner
-from .lidar_utils import LidarHelper
-from .constants import *
-from .rospy_utils import *
+from robotic_systems.utils.qlearning import QLearner
+from robotic_systems.utils.lidar_utils import LidarHelper
+from robotic_systems.utils.constants import *
+from robotic_systems.utils.rospy_utils import *
 
 
 class TrainingNode:
@@ -149,6 +149,7 @@ class TrainingNode:
         # end of learning -> maximum episodes reached
         if self.episode > self.max_episodes:
 
+            self.action_pub.publish(String("terminate"))
             rospy.signal_shutdown("End of learning process - Shutting down Training node")
 
         else:
@@ -163,7 +164,7 @@ class TrainingNode:
                     rospy.loginfo("Maximum steps per episode reached!")
 
                 # stopping the robot
-                self.action_pub.publish(String("terminate"))
+                self.action_pub.publish(String("stop"))
 
                 # adding logs into lists
                 self.steps_per_episode.append(self.ep_steps)
@@ -194,14 +195,14 @@ class TrainingNode:
                     rospy.loginfo("Spawning robot...")
 
                     # stopping the robot
-                    self.action_pub.publish(String("terminate"))
+                    self.action_pub.publish(String("stop"))
 
                     self.ep_steps = self.ep_steps - 1
                     self.first_action_taken = False
 
                     x_init, y_init, theta_init = self.reset_position()
 
-                    self.robot_spawned = self.check_initial_position(y_init, theta_init, )
+                    self.robot_spawned = self.check_initial_position(x_init, y_init, theta_init)
 
                     rospy.loginfo(
                         f"Robot spawned on initial position: x = {x_init}, y = {y_init}, theta = {theta_init}")

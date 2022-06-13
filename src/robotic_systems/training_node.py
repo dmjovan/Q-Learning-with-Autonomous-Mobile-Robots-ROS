@@ -5,7 +5,7 @@ import argparse
 
 from std_msgs.msg import String
 
-from utils.training_node_utils import TrainingNode
+from robotic_systems.utils.training_node_utils import TrainingNode
         
         
 if __name__ == '__main__':

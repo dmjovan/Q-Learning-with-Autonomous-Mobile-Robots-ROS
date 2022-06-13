@@ -3,8 +3,8 @@
 import rospy
 from std_msgs.msg import String
 
-from .rospy_utils import *
-from .constants import *
+from robotic_systems.utils.rospy_utils import *
+from robotic_systems.utils.constants import *
 
 
 class RobotControllerNode:
@@ -84,4 +84,5 @@ class RobotControllerNode:
             Shutting down.
         """
 
+        self.do_stop()
         rospy.signal_shutdown("Terminating robot controller")

@@ -8,10 +8,10 @@ from nav_msgs.msg import Odometry
 from sensor_msgs.msg import LaserScan
 from gazebo_msgs.msg import ModelState
 
-from .qlearning import QLearner
-from .lidar_utils import LidarHelper
-from .constants import *
-from .rospy_utils import *
+from robotic_systems.utils.qlearning import QLearner
+from robotic_systems.utils.lidar_utils import LidarHelper
+from robotic_systems.utils.constants import *
+from robotic_systems.utils.rospy_utils import *
 
 
 class InferenceNode:
@@ -95,7 +95,7 @@ class InferenceNode:
             rospy.loginfo("Spawning robot...")
 
             # stopping the robot
-            self.action_pub.publish(String("terminate"))
+            self.action_pub.publish(String("stop"))
 
             x_init, y_init, theta_init = self.reset_position()
             self.robot_spawned = self.check_initial_position(x_init, y_init, theta_init)

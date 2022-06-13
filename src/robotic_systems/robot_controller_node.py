@@ -2,7 +2,7 @@
 
 import rospy
 
-from utils.robot_controller_utils import RobotControllerNode
+from robotic_systems.utils.robot_controller_utils import RobotControllerNode
 
 
 if __name__ == "__main__":

@@ -5,7 +5,7 @@ import random
 import numpy as np
 from itertools import product
 
-from .constants import *
+from robotic_systems.utils.constants import *
 
 
 class QLearner:
@@ -26,7 +26,7 @@ class QLearner:
         else:
             try:
                 self.Q_table = self.read_q_table(path=Q_TABLE_PATH)
-                rospy.loginfo("Loaded Q table")
+                rospy.loginfo(f"Loaded Q table from path: {Q_TABLE_PATH}")
 
             except FileNotFoundError:
                 self.Q_table = self.create_q_table()
