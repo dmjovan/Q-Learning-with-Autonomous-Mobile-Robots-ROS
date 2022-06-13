@@ -182,6 +182,8 @@ def feedback_control(x, y, theta, x_goal, y_goal, theta_goal) -> tuple:
     alpha = (lamdba_ -  theta + np.pi) % (2 * np.pi) - np.pi
     beta = (theta_goal - lamdba_ + np.pi) % (2 * np.pi) - np.pi
 
+    goal_reached = False
+
     if rho < GOAL_DIST_THRESHOLD and math.degrees(abs(theta-theta_goal_norm)) < GOAL_ANGLE_THRESHOLD:
         goal_reached = True
         v = 0
@@ -189,11 +191,12 @@ def feedback_control(x, y, theta, x_goal, y_goal, theta_goal) -> tuple:
         v_scal = 0
         w_scal = 0
     else:
-        goal_reached = False
         v = K_RO * rho
         w = K_ALPHA * alpha + K_BETA * beta
         v_scal = v / abs(v) * V_CONST
         w_scal = w / abs(v) * V_CONST
+
+    print(f"Flag: {goal_reached}")
 
     return v_scal, w_scal, goal_reached
     

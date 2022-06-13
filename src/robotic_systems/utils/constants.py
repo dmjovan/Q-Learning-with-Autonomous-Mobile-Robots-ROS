@@ -20,22 +20,31 @@ CONST_LINEAR_SPEED_TURN = 0.06
 CONST_ANGULAR_SPEED_TURN = 0.4
 
 # Feedback control parameters
-K_RO = 2
-K_ALPHA = 15
-K_BETA = -3
+K_RO = 2 #2
+K_ALPHA = 15 #15
+K_BETA = -3 #-3
 V_CONST = 0.1  # [m/s]
 
-PATH_IND = 4
-INIT_POSITIONS_X = [-0.7, -0.7, -0.5, -1, -2]
-INIT_POSITIONS_Y = [-0.7, 0.7, 1, -2, 1]
-INIT_POSITIONS_THETA = [45, -45, -120, -90, 150]
-GOAL_POSITIONS_X = [2.0, 2.0, 0.5, 1, 2]
-GOAL_POSITIONS_Y = [1.0, -1.0, -1.9, 2, -1, ]
-GOAL_POSITIONS_THETA = [25.0, -40.0, -40, 60, -30, ]
+# PATH_IND = 4
+# INIT_POSITIONS_X = [-0.7, -0.7, -0.5, -1, 0]
+# INIT_POSITIONS_Y = [-0.7, 0.7, 1, -2, 0]
+# INIT_POSITIONS_THETA = [45, -45, -120, -90, 0]
+# GOAL_POSITIONS_X = [0, 2.0, 0.5, 1, 3]
+# GOAL_POSITIONS_Y = [-2, -1.0, -1.9, 2, 2]
+# GOAL_POSITIONS_THETA = [30.0, -40.0, -40, 60, 30]
+
+
+PATH_IND = 1
+INIT_POSITIONS_X = [-2, -2]
+INIT_POSITIONS_Y = [0, 0]
+INIT_POSITIONS_THETA = [-30, 30]
+GOAL_POSITIONS_X = [-0.5, -0.5]
+GOAL_POSITIONS_Y = [-0.5, 0.5]
+GOAL_POSITIONS_THETA = [0, 30]
 
 # Goal reaching threshold
 GOAL_DIST_THRESHOLD = 0.1  # [m]
-GOAL_ANGLE_THRESHOLD = 15  # [degrees]
+GOAL_ANGLE_THRESHOLD = 60  # [degrees]
 
 # Lidar constants
 MAX_LIDAR_DISTANCE = 1.0

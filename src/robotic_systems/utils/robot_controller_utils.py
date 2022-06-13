@@ -3,7 +3,7 @@
 import rospy
 from std_msgs.msg import String
 
-from robotic_systems.utils.rospy_utils import *
+from robotic_systems.utils.robot_utils import *
 from robotic_systems.utils.constants import *
 
 

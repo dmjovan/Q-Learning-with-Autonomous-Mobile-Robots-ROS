@@ -12,7 +12,7 @@ from sensor_msgs.msg import LaserScan
 from robotic_systems.utils.qlearning import QLearner
 from robotic_systems.utils.lidar_utils import LidarHelper
 from robotic_systems.utils.constants import *
-from robotic_systems.utils.rospy_utils import *
+from robotic_systems.utils.robot_utils import *
 
 
 class TrainingNode:
