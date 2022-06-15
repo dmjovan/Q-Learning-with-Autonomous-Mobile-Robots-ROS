@@ -17,7 +17,7 @@ ACTION_MAP = {0: "forward", 1: "left", 2: "right"}
 CONST_LINEAR_SPEED_FORWARD = 0.08
 CONST_ANGULAR_SPEED_FORWARD = 0.0
 CONST_LINEAR_SPEED_TURN = 0.06
-CONST_ANGULAR_SPEED_TURN = 0.8
+CONST_ANGULAR_SPEED_TURN = 0.5
 
 # Feedback control parameters
 K_RO = 2 #2
@@ -57,7 +57,7 @@ ANGLE_MIN = 0
 HORIZON_WIDTH = 75
 
 # Experiment versioning
-EXPERIMENT_NAME = "experiment_01"
+EXPERIMENT_NAME = "experiment_03"
 
 # Experiment paths
 PROJECT_ROOT = "/home/ros/ROS_Workspace/ROS_Projects/src/Q-Learning-with-Autonomous-Mobile-Robots-ROS/src/robotic_systems"

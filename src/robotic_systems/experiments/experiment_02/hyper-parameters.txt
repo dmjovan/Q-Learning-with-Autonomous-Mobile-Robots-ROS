@@ -1,7 +1,7 @@
-max_episodes: 2000
+max_episodes: 3000
 max_steps_per_episode: 500
 min_time_between_actions: 0.0
-random_init_position_flag: False
+random_init_position_flag: True
 alpha: 0.5
 gamma: 0.9
 epsilon: 0.9
