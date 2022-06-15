@@ -51,11 +51,11 @@ class QLearner:
         state_space = set(product(x1, x2, x3, x4))
         return np.array(list(state_space))
 
-    @staticmethod
-    def create_q_table() -> np.ndarray:
+    def create_q_table(self) -> np.ndarray:
         return np.zeros((self.state_space.size, self.actions.size))
 
-    def read_q_table(self, path: str) -> np.ndarray:
+    @staticmethod
+    def read_q_table(path: str) -> np.ndarray:
         return np.genfromtxt(path, delimiter=' , ')
 
     def update_epsilon(self):
