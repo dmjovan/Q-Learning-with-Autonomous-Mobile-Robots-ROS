@@ -4,7 +4,7 @@ import math
 import numpy as np
 from sensor_msgs.msg import LaserScan
 
-from .constants import *
+from robotic_systems.utils.constants import *
 
 
 class LidarHelper:

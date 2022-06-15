@@ -8,10 +8,10 @@ from nav_msgs.msg import Odometry
 from sensor_msgs.msg import LaserScan
 from gazebo_msgs.msg import ModelState
 
-from .qlearning import QLearner
-from .lidar_utils import LidarHelper
-from .constants import *
-from .rospy_utils import *
+from robotic_systems.utils.qlearning import QLearner
+from robotic_systems.utils.lidar_utils import LidarHelper
+from robotic_systems.utils.constants import *
+from robotic_systems.utils.robot_utils import *
 
 
 class InferenceNode:
@@ -34,7 +34,7 @@ class InferenceNode:
         Path(self.log_file_dir).mkdir(exist_ok=True, parents=True)
 
         # subscriber to laser
-        rospy.Subscriber('/scan', LaserScan, self.scan_callback)
+        rospy.Subscriber('/odom', Odometry, self.odom_callback)
 
         # initial robot positions & goal position
         self.x_init = INIT_POSITIONS_X[PATH_IND]
@@ -48,18 +48,14 @@ class InferenceNode:
         # initial position
         self.robot_spawned = False
 
-        # goal reached flag
-        self.goal_reached = False
-
     def run(self):
 
         while not rospy.is_shutdown():
             self.rate.sleep()
 
     @staticmethod
-    def check_initial_position(x_init: float, y_init: float, theta_init: float) -> bool:
+    def check_initial_position(odomMsg: Odometry, x_init: float, y_init: float, theta_init: float) -> bool:
 
-        odomMsg = rospy.wait_for_message('/odom', Odometry)
         x, y = get_position(odomMsg)
         theta = math.degrees(get_rotation(odomMsg))
 
@@ -83,11 +79,7 @@ class InferenceNode:
 
         return x, y, theta
 
-    def scan_callback(self, lidarMsg: LaserScan) -> None:
-
-        if self.goal_reached:
-            self.action_pub.publish(String("terminate"))
-            rospy.signal_shutdown('Goal reached! End of testing!')
+    def odom_callback(self, odomMsg: Odometry) -> None:
 
         # spawning robot on initial position
         if not self.robot_spawned:
@@ -95,17 +87,16 @@ class InferenceNode:
             rospy.loginfo("Spawning robot...")
 
             # stopping the robot
-            self.action_pub.publish(String("terminate"))
+            self.action_pub.publish(String("stop"))
 
             x_init, y_init, theta_init = self.reset_position()
-            self.robot_spawned = self.check_initial_position(x_init, y_init, theta_init)
+            self.robot_spawned = self.check_initial_position(odomMsg, x_init, y_init, theta_init)
 
             rospy.loginfo(f"Robot spawned on initial position: x = {x_init}, y = {y_init}, theta = {theta_init}")
             rospy.loginfo(f"Robots goal position is: x = {self.x_goal}, y = {self.y_goal}, theta = {self.theta_goal}")
 
         else:
-
-            odomMsg = rospy.wait_for_message('/odom', Odometry)
+            lidarMsg = rospy.wait_for_message('/scan', LaserScan)
 
             # get robot position and orientation
             x, y = get_position(odomMsg)
@@ -123,16 +114,24 @@ class InferenceNode:
 
             # stop the testing
             if crash:
+                self.action_pub.publish(String("stop"))
                 self.action_pub.publish(String("terminate"))
                 rospy.loginfo("Crash! Stopping robot. Terminating inference node.")
                 rospy.signal_shutdown('Crash! End of testing!')
 
             # feedback control algorithm -> if there is a clear path to the goal
-            elif not object_nearby or goal_near:
+            elif (not object_nearby) or goal_near:
                 rospy.loginfo("Using feedback control algorithm for robot control ...")
-                v_scal, w_scal, self.goal_reached = feedback_control(x, y, theta, self.x_goal, self.y_goal,
+                v_scal, w_scal, goal_reached = feedback_control(x, y, theta, self.x_goal, self.y_goal,
                                                                      math.radians(self.theta_goal))
-                self.action_pub.publish(String(str(v_scal) + "_" + str(w_scal)))
+
+                if goal_reached:
+                    self.action_pub.publish(String("stop"))
+                    self.action_pub.publish(String("terminate"))
+                    rospy.signal_shutdown('Goal reached! End of testing!')
+
+                else:
+                    self.action_pub.publish(String(str(v_scal) + "_" + str(w_scal)))
 
             # Q-learning algorithm inference ->
             else:

@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 
-from platform import node
 import rospy
 import argparse
 
 from std_msgs.msg import String
 
-from utils.inference_node_utils import InferenceNode
+from robotic_systems.utils.inference_node_utils import InferenceNode
 
 
 if __name__ == '__main__':

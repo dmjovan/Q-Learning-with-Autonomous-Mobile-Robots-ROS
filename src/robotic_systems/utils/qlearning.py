@@ -5,7 +5,7 @@ import random
 import numpy as np
 from itertools import product
 
-from .constants import *
+from robotic_systems.utils.constants import *
 
 
 class QLearner:
@@ -26,7 +26,7 @@ class QLearner:
         else:
             try:
                 self.Q_table = self.read_q_table(path=Q_TABLE_PATH)
-                rospy.loginfo("Loaded Q table")
+                rospy.loginfo(f"Loaded Q table from path: {Q_TABLE_PATH}")
 
             except FileNotFoundError:
                 self.Q_table = self.create_q_table()
@@ -51,11 +51,11 @@ class QLearner:
         state_space = set(product(x1, x2, x3, x4))
         return np.array(list(state_space))
 
-    @staticmethod
-    def create_q_table() -> np.ndarray:
+    def create_q_table(self) -> np.ndarray:
         return np.zeros((self.state_space.size, self.actions.size))
 
-    def read_q_table(self, path: str) -> np.ndarray:
+    @staticmethod
+    def read_q_table(path: str) -> np.ndarray:
         return np.genfromtxt(path, delimiter=' , ')
 
     def update_epsilon(self):
