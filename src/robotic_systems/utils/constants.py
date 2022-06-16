@@ -57,7 +57,7 @@ ANGLE_MIN = 0
 HORIZON_WIDTH = 75
 
 # Experiment versioning
-EXPERIMENT_NAME = "experiment_03"
+EXPERIMENT_NAME = "experiment_04"
 
 # Experiment paths
 PROJECT_ROOT = "/home/ros/ROS_Workspace/ROS_Projects/src/Q-Learning-with-Autonomous-Mobile-Robots-ROS/src/robotic_systems"
