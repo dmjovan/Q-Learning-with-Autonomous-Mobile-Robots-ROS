@@ -18,12 +18,13 @@ from robotic_systems.utils.robot_utils import *
 class TrainingNode:
 
     def __init__(self, load_q_table: bool = False,
-                 max_episodes: int = 500,
-                 max_steps_per_episode: int = 500,
+                 max_episodes: int = 1000,
+                 max_steps_per_episode: int = 200,
                  min_time_between_actions: float = 0.0,
-                 random_init_position_flag: bool = False,
+                 random_init_position_flag: bool = True,
                  alpha: float = 0.5,
                  gamma: float = 0.9,
+                 explore: bool = True,
                  epsilon: float = 0.9,
                  epsilon_grad: float = 0.96,
                  epsilon_min: float = 0.05) -> None:
@@ -48,12 +49,13 @@ class TrainingNode:
         self.random_init_position_flag = random_init_position_flag
         self.alpha = alpha
         self.gamma = gamma
+        self.explore = explore
         self.epsilon = epsilon
         self.epsilon_grad = epsilon_grad
         self.epsilon_min = epsilon_min
 
         # Q-Learning algorithm instance
-        self.qlearner = QLearner(load_q_table, self.alpha, self.gamma, self.epsilon, self.epsilon_grad,
+        self.qlearner = QLearner(load_q_table, self.alpha, self.gamma, self.explore, self.epsilon, self.epsilon_grad,
                                  self.epsilon_min)
 
         # experiment trackers
@@ -181,7 +183,9 @@ class TrainingNode:
                 self.crash = False
                 self.robot_spawned = False
                 self.first_action_taken = False
-                self.qlearner.update_epsilon()
+
+                if self.explore:
+                    self.qlearner.update_epsilon()
 
                 rospy.loginfo(f"Finished episode {self.episode}/{self.max_episodes}")
                 self.episode = self.episode + 1

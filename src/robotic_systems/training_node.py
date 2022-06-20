@@ -17,10 +17,11 @@ if __name__ == '__main__':
         arg_formatter = argparse.ArgumentDefaultsHelpFormatter
         parser = argparse.ArgumentParser(formatter_class=arg_formatter)
         parser.add_argument("--load-q-table", dest="load_q_table", type=bool, default=False)
-        parser.add_argument("--max-episodes", dest="max_episodes", type=int, default=500)
-        parser.add_argument("--max-steps", dest="max_steps", type=int, default=500)
-        parser.add_argument("--random-pos", dest="random_pos", type=bool, default=False)
+        parser.add_argument("--max-episodes", dest="max_episodes", type=int, default=2000)
+        parser.add_argument("--max-steps", dest="max_steps", type=int, default=200)
+        parser.add_argument("--random-pos", dest="random_pos", type=bool, default=True)
         parser.add_argument("--alpha", dest="alpha", type=float, default=0.5)
+        parser.add_argument("--explore", dest="explore", type=bool, default=True)
         parser.add_argument("--gamma", dest="gamma", type=float, default=0.9)
         parser.add_argument("--epsilon", dest="epsilon", type=float, default=0.9)
         parser.add_argument("--epsilon-grad", dest="epsilon_grad", type=float, default=0.96)
@@ -34,6 +35,7 @@ if __name__ == '__main__':
         random_pos = True if str(args.random_pos) in ["True", "true"] else False
         alpha = float(args.alpha)
         gamma_ = float(args.gamma)
+        explore = True if str(args.explore) in ["True", "true"] else False
         epsilon = float(args.epsilon)
         epsilon_grad = float(args.epsilon_grad)
         epsilon_min = float(args.epsilon_min)
@@ -44,6 +46,7 @@ if __name__ == '__main__':
                             random_init_position_flag=random_pos,
                             alpha=alpha,
                             gamma=gamma_,
+                            explore=explore,
                             epsilon=epsilon,
                             epsilon_grad=epsilon_grad,
                             epsilon_min=epsilon_min)

@@ -1,0 +1,21 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "",
+        "limitSymbolsToIncludedHeaders": true
+      },
+      "includePath": [
+        "/opt/ros/noetic/include/**",
+        "/home/ros/ROS_Workspace/ROS_Projects/devel/include/**",
+        "/home/ros/ROS_Workspace/ROS_Projects/src/DynamixelSDK/ros/dynamixel_sdk/include/**",
+        "/home/ros/ROS_Workspace/ROS_Projects/src/turtlebot3_simulations/turtlebot3_fake/include/**",
+        "/home/ros/ROS_Workspace/ROS_Projects/src/turtlebot3_simulations/turtlebot3_gazebo/include/**",
+        "/home/ros/ROS_Workspace/ROS_Projects/src/turtlebot3/turtlebot3_slam/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS"
+    }
+  ],
+  "version": 4
+}

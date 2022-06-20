@@ -13,6 +13,7 @@ class QLearner:
     def __init__(self, load_q_table: bool = False,
                  alpha: float = 0.5,
                  gamma: float = 0.9,
+                 explore: bool = False,
                  epsilon: float = 0.9,
                  epsilon_grad: float = 0.96,
                  epsilon_min: float = 0.05) -> None:
@@ -34,6 +35,8 @@ class QLearner:
 
         self.alpha = alpha
         self.gamma = gamma
+        self.explore = explore
+
         self.epsilon = epsilon
         self.epsilon_grad = epsilon_grad
         self.epsilon_min = epsilon_min
@@ -73,7 +76,7 @@ class QLearner:
         return action
 
     def epsilon_greedy_exploration(self, state_ind: int):
-        if random.random() > self.epsilon and STATE_SPACE_IND_MIN <= state_ind <= STATE_SPACE_IND_MAX:
+        if self.explore and random.random() > self.epsilon and STATE_SPACE_IND_MIN <= state_ind <= STATE_SPACE_IND_MAX:
             action = self.get_best_action(state_ind)
         else:
             action = self.get_random_action()
@@ -103,29 +106,35 @@ class QLearner:
             prev_lidar_horizon = np.concatenate((prev_lidar[left_half_indices_start:left_half_indices_end:-1],
                                                  prev_lidar[right_half_indices_start:right_half_indices_end:-1]))
 
-            # reward from taken action
-            if action == 0:
-                r_action = 0.2  # forward -> 0.2 reward
-            else:
-                r_action = -0.1  # turning -> -0.1 rewards
+            # # reward from taken action
+            # if action == 0:
+            #     r_action = 0.2  # forward -> 0.2 reward
+            # else:
+            #     r_action = -0.1  # turning -> -0.1 rewards
 
             # reward from crash distance to obstacle change # FIXME: first W is unused!?
             w = np.linspace(0.9, 1.1, len(lidar_horizon) // 2)
             w = np.append(w, np.linspace(1.1, 0.9, len(lidar_horizon) // 2))
 
             if np.sum(w * (lidar_horizon - prev_lidar_horizon)) >= 0:
-                r_obstacle = 0.2
+                r_obstacle = 2
             else:
-                r_obstacle = -0.2
+                r_obstacle = -2
 
             # reward from turn left/right change
             if (prev_action == 1 and action == 2) or (prev_action == 2 and action == 1):
-                r_change = -0.8  # getting bigger punishment for moving left-right-left-right
+                r_change = -3  # getting bigger punishment for moving left-right-left-right
             else:
-                r_change = 0.0
+                r_change = 0
+
+            
+            rospy.loginfo(f"Reward for obstacle avoidance: {r_obstacle}")
+            rospy.loginfo(f"Reward for left/right change: {r_change}")
 
             # overall step reward
-            reward = r_action + r_obstacle + r_change
+            # reward = r_action + r_obstacle + r_change
+
+            reward = r_obstacle + r_change
 
         return reward
 

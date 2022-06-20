@@ -20,19 +20,10 @@ CONST_LINEAR_SPEED_TURN = 0.06
 CONST_ANGULAR_SPEED_TURN = 0.5
 
 # Feedback control parameters
-K_RO = 2 #2
-K_ALPHA = 10 #15
-K_BETA = 0 #-3
+K_RO = 2
+K_ALPHA = 15
+K_BETA = -3
 V_CONST = 0.1  # [m/s]
-
-# PATH_IND = 4
-# INIT_POSITIONS_X = [-0.7, -0.7, -0.5, -1, 0]
-# INIT_POSITIONS_Y = [-0.7, 0.7, 1, -2, 0]
-# INIT_POSITIONS_THETA = [45, -45, -120, -90, 0]
-# GOAL_POSITIONS_X = [0, 2.0, 0.5, 1, 3]
-# GOAL_POSITIONS_Y = [-2, -1.0, -1.9, 2, 2]
-# GOAL_POSITIONS_THETA = [30.0, -40.0, -40, 60, 30]
-
 
 PATH_IND = 0
 INIT_POSITIONS_X = [-2, -2]
@@ -57,7 +48,7 @@ ANGLE_MIN = 0
 HORIZON_WIDTH = 75
 
 # Experiment versioning
-EXPERIMENT_NAME = "experiment_04"
+EXPERIMENT_NAME = "experiment_07"
 
 # Experiment paths
 PROJECT_ROOT = "/home/ros/ROS_Workspace/ROS_Projects/src/Q-Learning-with-Autonomous-Mobile-Robots-ROS/src/robotic_systems"

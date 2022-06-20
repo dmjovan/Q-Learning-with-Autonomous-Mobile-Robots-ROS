@@ -90,6 +90,7 @@ class InferenceNode:
             self.action_pub.publish(String("stop"))
 
             x_init, y_init, theta_init = self.reset_position()
+
             self.robot_spawned = self.check_initial_position(odomMsg, x_init, y_init, theta_init)
 
             rospy.loginfo(f"Robot spawned on initial position: x = {x_init}, y = {y_init}, theta = {theta_init}")
