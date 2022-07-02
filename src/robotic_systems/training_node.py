@@ -23,7 +23,7 @@ if __name__ == '__main__':
         parser.add_argument("--alpha", dest="alpha", type=float, default=0.5)
         parser.add_argument("--explore", dest="explore", type=bool, default=True)
         parser.add_argument("--gamma", dest="gamma", type=float, default=0.9)
-        parser.add_argument("--epsilon", dest="epsilon", type=float, default=0.9)
+        parser.add_argument("--epsilon", dest="epsilon", type=float, default=0.99)
         parser.add_argument("--epsilon-grad", dest="epsilon_grad", type=float, default=0.96)
         parser.add_argument("--epsilon-min", dest="epsilon_min", type=float, default=0.05)
 

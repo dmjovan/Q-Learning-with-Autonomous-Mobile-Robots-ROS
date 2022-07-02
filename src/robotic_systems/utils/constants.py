@@ -20,22 +20,22 @@ CONST_LINEAR_SPEED_TURN = 0.06
 CONST_ANGULAR_SPEED_TURN = 0.5
 
 # Feedback control parameters
-K_RO = 2
-K_ALPHA = 15
-K_BETA = -3
+K_RO = .1
+K_ALPHA = .3
+K_BETA = -.1
 V_CONST = 0.1  # [m/s]
 
 PATH_IND = 0
-INIT_POSITIONS_X = [-2, -2]
-INIT_POSITIONS_Y = [0, 0]
-INIT_POSITIONS_THETA = [-30, 30]
-GOAL_POSITIONS_X = [-0.5, -0.5]
-GOAL_POSITIONS_Y = [-0.5, 0.5]
-GOAL_POSITIONS_THETA = [0, 30]
+INIT_POSITIONS_X = [-2, -2, 0.5]
+INIT_POSITIONS_Y = [0, 0, -0.5]
+INIT_POSITIONS_THETA = [-30, 30, 180]
+GOAL_POSITIONS_X = [-0.5, -0.5, -0.5]
+GOAL_POSITIONS_Y = [-0.5, 0.5, -0.5]
+GOAL_POSITIONS_THETA = [0, 30, 180]
 
 # Goal reaching threshold
-GOAL_DIST_THRESHOLD = 0.1  # [m]
-GOAL_ANGLE_THRESHOLD = 60  # [degrees]
+GOAL_DIST_THRESHOLD = 0.2  # [m]
+GOAL_ANGLE_THRESHOLD = 360  # [degrees]
 
 # Lidar constants
 MAX_LIDAR_DISTANCE = 1.0
@@ -48,7 +48,7 @@ ANGLE_MIN = 0
 HORIZON_WIDTH = 75
 
 # Experiment versioning
-EXPERIMENT_NAME = "experiment_07"
+EXPERIMENT_NAME = "experiment_08"
 
 # Experiment paths
 PROJECT_ROOT = "/home/ros/ROS_Workspace/ROS_Projects/src/Q-Learning-with-Autonomous-Mobile-Robots-ROS/src/robotic_systems"

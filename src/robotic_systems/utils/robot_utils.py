@@ -9,8 +9,31 @@ from tf.transformations import euler_from_quaternion, quaternion_from_euler
 
 from robotic_systems.utils.constants import *
 
+
+def get_rotation_from_gps(modelStateMsg: ModelState) -> float:
+
+    """
+        Get yaw angle in radians from provided odomMsg.
+    """
+
+    orientation_q = modelStateMsg.pose[2].orientation
+    orientation_list = [orientation_q.x, orientation_q.y, orientation_q.z, orientation_q.w]
+    roll, pitch, yaw = euler_from_quaternion(orientation_list)
+    return yaw
+
+
+def get_position_from_gps(modelStateMsg: ModelState) -> tuple:
+
+    """
+        Get x and y coordinates in meters.
+    """
+
+    x = modelStateMsg.pose[2].position.x
+    y = modelStateMsg.pose[2].position.y
+    return x, y
+
     
-def get_rotation(odomMsg: Odometry) -> float:
+def get_rotation_from_odom(odomMsg: Odometry) -> float:
 
     """
         Get yaw angle in radians from provided odomMsg.
@@ -22,7 +45,7 @@ def get_rotation(odomMsg: Odometry) -> float:
     return yaw
 
 
-def get_position(odomMsg: Odometry) -> tuple:
+def get_position_from_odom(odomMsg: Odometry) -> tuple:
 
     """
         Get x and y coordinates in meters.
@@ -176,7 +199,7 @@ def feedback_control(x, y, theta, x_goal, y_goal, theta_goal) -> tuple:
     else:
         theta_goal_norm = theta_goal
 
-    rho = np.sqrt(pow((x_goal - x), 2) + pow((y_goal - y), 2))
+    rho = np.sqrt((x_goal - x)**2 + (y_goal - y)**2)
     lamdba_ = math.atan2((y_goal - y), (x_goal - x ))
 
     alpha = (lamdba_ -  theta + np.pi) % (2 * np.pi) - np.pi
@@ -184,7 +207,7 @@ def feedback_control(x, y, theta, x_goal, y_goal, theta_goal) -> tuple:
 
     goal_reached = False
 
-    if rho < GOAL_DIST_THRESHOLD and math.degrees(abs(theta-theta_goal_norm)) < GOAL_ANGLE_THRESHOLD:
+    if rho < GOAL_DIST_THRESHOLD:
         goal_reached = True
         v = 0
         w = 0
@@ -192,11 +215,22 @@ def feedback_control(x, y, theta, x_goal, y_goal, theta_goal) -> tuple:
         w_scal = 0
     else:
         v = K_RO * rho
-        w = K_ALPHA * alpha + K_BETA * beta
+        w = K_ALPHA * alpha #+ K_BETA * beta
         v_scal = v / abs(v) * V_CONST
         w_scal = w / abs(v) * V_CONST
 
-    print(f"Flag: {goal_reached}")
+        if v > 0:
+            v_scal = np.clip(v, V_CONST, 5*V_CONST)
+        else:
+            v_scal = np.clip(v, -5*V_CONST, -V_CONST)
+        if w > 0:
+            w_scal = np.clip(w, 0.5*V_CONST, 20*V_CONST)
+        else:
+            w_scal = np.clip(w, -20*V_CONST, -0.5*V_CONST)
+
+
+
+    print(f"Distance from goal: {rho} ->  Goal reached: {goal_reached}")
 
     return v_scal, w_scal, goal_reached
     

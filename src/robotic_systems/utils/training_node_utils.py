@@ -94,8 +94,8 @@ class TrainingNode:
     def check_initial_position(x_init: float, y_init: float, theta_init: float) -> bool:
 
         odomMsg = rospy.wait_for_message('/odom', Odometry)
-        x, y = get_position(odomMsg)
-        theta = math.degrees(get_rotation(odomMsg))
+        x, y = get_position_from_odom(odomMsg)
+        theta = math.degrees(get_rotation_from_odom(odomMsg))
 
         if abs(x - x_init) < 0.01 and abs(y - y_init) < 0.01 and abs(theta - theta_init) < 1:
             return True
