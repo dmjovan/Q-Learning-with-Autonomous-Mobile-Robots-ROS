@@ -252,9 +252,6 @@ class TrainingNode:
                     # update Q-table
                     self.qlearner.update_q_table(self.prev_state_ind, action, reward, state_ind)
 
-                    # get next action using epsilon-greedy policy
-                    action = self.qlearner.epsilon_greedy_exploration(state_ind)
-
                     # execute the selected action
                     self.action_pub.publish(String(ACTION_MAP[action]))
 
